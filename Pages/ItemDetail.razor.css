@@ -1,0 +1,163 @@
+.missing {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+}
+
+.missing h1 {
+    font-size: 96px;
+}
+
+.missing p {
+    margin: 0.75rem 0 1.5rem;
+}
+
+.detail {
+    padding-top: 2rem;
+    padding-bottom: 5rem;
+}
+
+.back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+}
+
+.photo {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--fog);
+}
+
+.photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tag {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    background: var(--paper);
+    padding: 0.25rem 0.5rem;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.name {
+    margin: 0;
+    font-size: clamp(52px, 6vw, 88px);
+}
+
+.sub {
+    margin: 0.75rem 0 0;
+    font-size: 0.875rem;
+}
+
+.price {
+    margin: 1.5rem 0;
+    font-size: clamp(64px, 7vw, 104px);
+}
+
+.desc {
+    max-width: 34rem;
+    margin: 0 0 1.5rem;
+    line-height: 1.6;
+}
+
+.specs {
+    margin: 0 0 2rem;
+    border-top: 1px solid var(--ink);
+}
+
+.specs div {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(10, 10, 10, 0.1);
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
+}
+
+.specs dt {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--mute);
+}
+
+.specs dd {
+    margin: 0;
+    font-weight: 600;
+}
+
+.buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.note {
+    background: var(--fog);
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+}
+
+.related {
+    margin-top: 5rem;
+}
+
+.related h2 {
+    margin-bottom: 2rem;
+    font-size: 56px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3rem 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .layout {
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+    }
+
+    .grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.report-link {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    max-width: 34rem;
+    margin: -0.5rem 0 1.5rem;
+    border: 2px solid var(--ink);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    transition: background 0.2s;
+}
+
+.report-link:hover {
+    background: var(--volt);
+}
+
+.report-link > :first-child {
+    flex: none;
+    width: 9rem;
+}

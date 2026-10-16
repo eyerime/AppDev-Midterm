@@ -1,0 +1,16 @@
+<div class="section-head">
+    <div>
+        <p class="@KickerClass">@Kicker</p>
+        <h2 class="display section-title">@Title</h2>
+    </div>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Kicker { get; set; } = "";
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    [Parameter] public bool Dark { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string KickerClass => Dark ? "kicker kicker-volt" : "kicker";
+}

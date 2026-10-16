@@ -1,0 +1,121 @@
+@page "/checkout"
+@inject CartService Cart
+@inject OrderService Orders
+@inject CatalogService Catalog
+@inject NavigationManager Nav
+
+<PageTitle>Checkout · Resound</PageTitle>
+
+<div class="container checkout">
+    <h1 class="display title">Check<span class="text-volt-bg">out</span></h1>
+
+    @if (Cart.Count == 0)
+    {
+        <div class="empty">
+            <p class="display empty-title">Nothing to check out</p>
+            <a href="/#market" class="btn btn-volt">Shop gear <Icon Name="IconName.Arrow" /></a>
+        </div>
+    }
+    else
+    {
+        <div class="layout">
+            <div class="form-col">
+                <h2 class="display heading">Shipping</h2>
+                <div class="form">
+                    <label class="wide">
+                        <span>Full name</span>
+                        <input autocomplete="name" @bind="_name" @bind:event="oninput" />
+                    </label>
+                    <label class="wide">
+                        <span>Email</span>
+                        <input type="email" autocomplete="email" @bind="_email" @bind:event="oninput" />
+                    </label>
+                    <label class="wide">
+                        <span>Street address</span>
+                        <input autocomplete="street-address" @bind="_address" @bind:event="oninput" />
+                    </label>
+                    <label>
+                        <span>City</span>
+                        <input autocomplete="address-level2" @bind="_city" @bind:event="oninput" />
+                    </label>
+                    <label>
+                        <span>Postal code</span>
+                        <input autocomplete="postal-code" @bind="_postal" @bind:event="oninput" />
+                    </label>
+                </div>
+
+                <h2 class="display heading">Payment</h2>
+                <div class="payments">
+                    @foreach (var method in PaymentMethods)
+                    {
+                        var current = method;
+                        <label class="@(_payment == current ? "pay pay-on" : "pay")">
+                            <input type="radio" name="payment" checked="@(_payment == current)" @onchange="() => _payment = current" />
+                            @current
+                        </label>
+                    }
+                </div>
+                <p class="muted small">Demo checkout — no real payment is taken and no card details are collected.</p>
+            </div>
+
+            <aside class="summary">
+                <h2 class="display">Your order</h2>
+                <ul>
+                    @foreach (var item in Cart.Items)
+                    {
+                        <li>
+                            <img src="@item.Img" alt="" />
+                            <span>@item.Name</span>
+                            <b>@Format.Money(item.Price)</b>
+                        </li>
+                    }
+                </ul>
+                <div class="row"><span>Subtotal</span><span>@Format.Money(Cart.Subtotal)</span></div>
+                <div class="row"><span>Shipping</span><span>@Format.Money(Cart.Shipping)</span></div>
+                <div class="row total"><span>Total</span><span>@Format.Money(Cart.Total)</span></div>
+
+                @if (_error is not null)
+                {
+                    <p class="error">@_error</p>
+                }
+                <button class="btn btn-volt block" @onclick="PlaceOrder">Place order @Format.Money(Cart.Total)</button>
+                <a href="cart" class="back">← Back to cart</a>
+            </aside>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly string[] PaymentMethods = { "Card (demo)", "PayPal (demo)", "Cash on pickup" };
+
+    private string _name = "";
+    private string _email = "";
+    private string _address = "";
+    private string _city = "";
+    private string _postal = "";
+    private string _payment = PaymentMethods[0];
+    private string? _error;
+
+    private void PlaceOrder()
+    {
+        if (new[] { _name, _address, _city, _postal }.Any(string.IsNullOrWhiteSpace))
+        {
+            _error = "Please fill in your name and full shipping address.";
+            return;
+        }
+
+        if (!_email.Contains('@') || !_email.Contains('.'))
+        {
+            _error = "Please enter a valid email address.";
+            return;
+        }
+
+        var items = Cart.Items.ToList();
+        var details = new CheckoutDetails(_name.Trim(), _email.Trim(), _address.Trim(), _city.Trim(), _postal.Trim(), _payment);
+        var order = Orders.Place(items, Cart.Shipping, details);
+
+        Catalog.Remove(items.Select(i => i.Id));
+        Cart.Clear();
+        Nav.NavigateTo($"order/{order.Number}");
+    }
+}

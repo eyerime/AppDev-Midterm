@@ -1,0 +1,203 @@
+/* ==========================================================================
+   Resound — global styles: design tokens, base elements, shared primitives.
+   Component-specific styles live next to each component (*.razor.css).
+   ========================================================================== */
+
+:root {
+    --ink: #0a0a0a;
+    --paper: #ffffff;
+    --fog: #f1f1ef;
+    --mute: #6f6f6b;
+    --volt: #ffe600;
+    --outbid: #ff2d2d;
+    --font-display: 'Oswald', 'Arial Narrow', sans-serif;
+    --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* ---- Base ---------------------------------------------------------------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+img { display: block; max-width: 100%; }
+h1, h2, h3 { margin: 0; }
+
+::selection { background: var(--volt); color: var(--ink); }
+
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
+
+button:focus-visible, input:focus-visible, a:focus-visible {
+    outline: 3px solid var(--volt);
+    outline-offset: 2px;
+}
+
+h1:focus { outline: none; }
+
+/* ---- Typography helpers -------------------------------------------------- */
+
+.display {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+}
+
+.tnum { font-variant-numeric: tabular-nums; }
+.muted { color: var(--mute); }
+.text-volt { color: var(--volt); }
+.text-volt-bg {
+    display: inline-block;
+    background: var(--volt);
+    padding: 0.04em 0.2em 0;
+    line-height: 1.02;
+}
+
+.kicker {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--mute);
+}
+.kicker-volt { color: var(--volt); }
+
+/* ---- Layout -------------------------------------------------------------- */
+
+.container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .container { padding-left: 2.5rem; padding-right: 2.5rem; }
+}
+
+.not-found { padding-top: 6rem; padding-bottom: 6rem; }
+.not-found h1 { font-size: 96px; margin-bottom: 1rem; }
+.not-found p { margin: 0 0 1.5rem; color: var(--mute); }
+
+/* ---- Buttons & badges ---------------------------------------------------- */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    padding: 1rem 2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn-sm { padding: 0.75rem 1.5rem; font-size: 0.875rem; }
+
+.btn-volt { background: var(--volt); color: var(--ink); }
+.btn-volt:hover { background: var(--paper); }
+
+.btn-ghost { border-color: var(--paper); color: var(--paper); }
+.btn-ghost:hover { background: var(--paper); color: var(--ink); }
+
+.btn-ink { background: var(--ink); color: var(--paper); }
+.btn-ink:hover { background: var(--outbid); }
+
+.btn-outline-ink { border-color: var(--ink); color: var(--ink); }
+.btn-outline-ink:hover { background: var(--ink); color: var(--paper); }
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.badge-volt { background: var(--volt); color: var(--ink); }
+.badge-outbid { background: var(--outbid); color: var(--paper); }
+
+/* ---- Animation ----------------------------------------------------------- */
+
+@keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(255, 230, 0, 0.7); }
+    100% { box-shadow: 0 0 0 10px rgba(255, 230, 0, 0); }
+}
+.pulse-dot { animation: pulse-ring 1.4s infinite; }
+
+/* ---- Blazor chrome (loading + error UI) ---------------------------------- */
+
+.loading-progress {
+    position: absolute;
+    display: block;
+    width: 8rem;
+    height: 8rem;
+    inset: 20vh 0 auto 0;
+    margin: 0 auto;
+}
+
+.loading-progress circle {
+    fill: none;
+    stroke: var(--fog);
+    stroke-width: 0.6rem;
+    transform-origin: 50% 50%;
+    transform: rotate(-90deg);
+}
+
+.loading-progress circle:last-child {
+    stroke: var(--ink);
+    stroke-dasharray: calc(3.142 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
+    transition: stroke-dasharray 0.05s ease-in-out;
+}
+
+.loading-progress-text {
+    position: absolute;
+    text-align: center;
+    font-weight: 700;
+    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+}
+
+.loading-progress-text:after {
+    content: var(--blazor-load-percentage-text, "Loading");
+}
+
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 1000;
+    background: var(--volt);
+    padding: 0.6rem 1.25rem;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+}
+
+#blazor-error-ui .dismiss {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+    cursor: pointer;
+}
+
+.blazor-error-boundary {
+    background: var(--outbid);
+    padding: 1rem;
+    color: var(--paper);
+}
+
+.blazor-error-boundary::after { content: "An error has occurred."; }

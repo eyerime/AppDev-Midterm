@@ -1,0 +1,179 @@
+<section class="report" id="report">
+    <div class="head">
+        <div>
+            <p class="kicker">Second-hand transparency</p>
+            <h2 class="display">Condition report</h2>
+        </div>
+        @if (Report is not null)
+        {
+            <TransparencyMeter Report="Report" />
+        }
+    </div>
+
+    <div class="block">
+        <p class="block-title">Condition grade</p>
+        <div class="grades">
+            @foreach (var (name, _) in ConditionGrades.Scale)
+            {
+                <div class="@GradeClass(name)">@name</div>
+            }
+        </div>
+        <p class="grade-desc"><b>@Condition.</b> @ConditionGrades.Describe(Condition)</p>
+    </div>
+
+    @if (Report is null)
+    {
+        <p class="empty">The seller hasn't added a detailed report for this item. Ask a question before you buy.</p>
+    }
+    else
+    {
+        <div class="block">
+            <p class="block-title">History</p>
+            <dl class="facts">
+                <div><dt>Year made</dt><dd>@(Report.YearMade?.ToString() ?? "Not stated")</dd></div>
+                <div><dt>Ownership</dt><dd>@Report.OwnerCount.OwnerLabel()</dd></div>
+                <div><dt>Used for</dt><dd>@Report.Usage.Label()</dd></div>
+                <div><dt>Reason for selling</dt><dd>@(string.IsNullOrWhiteSpace(Report.ReasonForSelling) ? "Not stated" : Report.ReasonForSelling)</dd></div>
+            </dl>
+        </div>
+
+        <div class="block">
+            <p class="block-title">Price check</p>
+            @if (Report.OriginalPrice is { } original)
+            {
+                var off = Report.PercentOffNew(Price);
+                <div class="price-check">
+                    <div><span class="muted">Original retail</span><b class="tnum">@Format.Money(original)</b></div>
+                    <div><span class="muted">@PriceLabel</span><b class="tnum">@Format.Money(Price)</b></div>
+                    <div class="off">
+                        @if (off is > 0)
+                        {
+                            <b>@off% below new</b>
+                        }
+                        else
+                        {
+                            <b>At or above original retail</b>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p class="muted">Original price not available — common for vintage and discontinued gear.</p>
+            }
+        </div>
+
+        <div class="block">
+            <p class="block-title">Wear &amp; flaws</p>
+            @if (Report.NoVisibleWear)
+            {
+                <p class="good-note">✓ The seller reports no visible wear.</p>
+            }
+            else if (Report.Wear.Count == 0)
+            {
+                <p class="muted">No wear details provided.</p>
+            }
+            else
+            {
+                <ul class="wear">
+                    @foreach (var note in Report.Wear)
+                    {
+                        <li>
+                            <span class="@SeverityClass(note.Severity)">@note.Severity.Label()</span>
+                            <span><b>@note.Area</b> — @note.Description</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="block">
+            <p class="block-title">Tested &amp; working</p>
+            @if (Report.Checks.Count == 0)
+            {
+                <p class="muted">No functional checks provided.</p>
+            }
+            else
+            {
+                <ul class="checks">
+                    @foreach (var check in Report.Checks)
+                    {
+                        <li class="@(check.Passed ? "pass" : "fail")">
+                            <span class="icon">@(check.Passed ? "✓" : "!")</span>
+                            <span>
+                                @check.Label
+                                @if (!string.IsNullOrWhiteSpace(check.Note))
+                                {
+                                    <small>@check.Note</small>
+                                }
+                            </span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="two">
+            <div class="block">
+                <p class="block-title">What's included</p>
+                @if (Report.Included.Count == 0)
+                {
+                    <p class="muted">Item only.</p>
+                }
+                else
+                {
+                    <ul class="plain">
+                        @foreach (var thing in Report.Included)
+                        {
+                            <li>@thing</li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="block">
+                <p class="block-title">Originality</p>
+                @if (Report.Modifications.Count == 0)
+                {
+                    <p class="good-note">✓ All original parts.</p>
+                }
+                else
+                {
+                    <ul class="plain">
+                        @foreach (var mod in Report.Modifications)
+                        {
+                            <li>@mod</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <div class="badges">
+            <span class="@Badge(Report.SerialVerified)">@(Report.SerialVerified ? "✓" : "–") Serial number verified</span>
+            <span class="@Badge(Report.HasReceipt)">@(Report.HasReceipt ? "✓" : "–") Proof of purchase</span>
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter] public ConditionReport? Report { get; set; }
+
+    [Parameter, EditorRequired] public string Condition { get; set; } = "";
+
+    /// <summary>Current asking price (or current bid) for the price check.</summary>
+    [Parameter] public int Price { get; set; }
+
+    [Parameter] public string PriceLabel { get; set; } = "Asking price";
+
+    private string GradeClass(string name) =>
+        string.Equals(name, Condition, StringComparison.OrdinalIgnoreCase) ? "grade on" : "grade";
+
+    private static string SeverityClass(WearSeverity severity) => severity switch
+    {
+        WearSeverity.Minor => "sev sev-minor",
+        WearSeverity.Moderate => "sev sev-mod",
+        _ => "sev sev-major"
+    };
+
+    private static string Badge(bool on) => on ? "badge-ok on" : "badge-ok";
+}

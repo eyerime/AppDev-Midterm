@@ -1,0 +1,85 @@
+.thumb {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--fog);
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    mix-blend-mode: multiply;
+    filter: grayscale(20%);
+    transition: transform 0.5s;
+}
+
+.fixed-card:hover .thumb img {
+    transform: scale(1.05);
+}
+
+.tag {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    background: var(--paper);
+    padding: 0.25rem 0.5rem;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.quick-add {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    background: var(--ink);
+    color: var(--paper);
+    transition: background 0.2s, color 0.2s;
+}
+
+.quick-add:hover {
+    background: var(--volt);
+    color: var(--ink);
+}
+
+.info {
+    padding-top: 0.75rem;
+}
+
+.info h3 {
+    margin: 0.125rem 0 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.info p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.info .price {
+    margin-top: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.fixed-card {
+    cursor: pointer;
+}
+
+.fixed-card.preview {
+    cursor: default;
+}
+
+.tm {
+    max-width: 11rem;
+    margin-top: 0.75rem;
+}

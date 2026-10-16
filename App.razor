@@ -1,0 +1,16 @@
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found · Resound</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <div class="container not-found">
+                <h1 class="display">Off <span class="text-volt-bg">key</span></h1>
+                <p>Sorry, there's nothing at this address.</p>
+                <a class="btn btn-ink" href="">Back home</a>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>

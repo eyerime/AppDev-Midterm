@@ -1,0 +1,42 @@
+@inject NavigationManager Nav
+
+<article class="@CardClass" @onclick="Open">
+    <div class="thumb">
+        <img src="@Auction.Img" alt="@Auction.Name" loading="lazy" />
+        <div class="thumb-top">
+            <span class="live-tag">
+                <span class="@DotClass"></span> Auction
+            </span>
+            <BidBadge Status="Auction.Status" />
+        </div>
+    </div>
+    <div class="body">
+        <p class="label">Ending in</p>
+        <p class="@CountdownClass">@Format.Countdown(Auction.TimeLeft)</p>
+        <h3>@Auction.FullName</h3>
+        <div class="bid-row">
+            <div>
+                <p class="label">Current Bid</p>
+                <p class="display tnum current">@Format.Money(Auction.CurrentBid)</p>
+            </div>
+            <p class="count">@Auction.BidCount bids</p>
+        </div>
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public Auction Auction { get; set; } = default!;
+
+    /// <summary>Preview cards render normally but are not clickable.</summary>
+    [Parameter] public bool Preview { get; set; }
+
+    private string CardClass => Preview ? "auction-card preview" : "auction-card";
+
+    private string DotClass => Auction.IsUrgent ? "dot dot-red" : "dot dot-volt";
+    private string CountdownClass => Auction.IsUrgent ? "display tnum countdown urgent" : "display tnum countdown";
+
+    private void Open()
+    {
+        if (!Preview) Nav.NavigateTo($"auctions/{Auction.Id}");
+    }
+}

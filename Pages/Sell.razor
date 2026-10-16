@@ -1,0 +1,411 @@
+@page "/sell"
+@inject CatalogService Catalog
+@inject AuctionService Auctions
+@inject NavigationManager Nav
+
+<PageTitle>Sell Gear · Resound</PageTitle>
+
+<div class="sell container">
+    <p class="kicker">Section C · Sell your gear</p>
+    <h1 class="display title">List <span class="text-volt-bg">Your Gear</span></h1>
+
+    <div class="layout">
+        <div class="editor">
+            <div class="modes">
+                <button class="@ModeClass(false)" @onclick="() => _isAuction = false">Buy It Now</button>
+                <button class="@ModeClass(true)" @onclick="() => _isAuction = true">Auction</button>
+            </div>
+
+            <h2 class="display section">1 · The basics</h2>
+            <div class="form">
+                <label>
+                    <span>Item name</span>
+                    <input placeholder="e.g. Stratocaster 1994" maxlength="60" @bind="_name" @bind:event="oninput" />
+                </label>
+                <label>
+                    <span>Brand</span>
+                    <input placeholder="e.g. Fender" maxlength="30" @bind="_brand" @bind:event="oninput" />
+                </label>
+                <label>
+                    <span>Category</span>
+                    <select @bind="_category">
+                        @foreach (var group in Enum.GetValues<CategoryGroup>())
+                        {
+                            <optgroup label="@group.DisplayName()">
+                                @foreach (var category in ItemCategoryExtensions.InGroup(group))
+                                {
+                                    <option value="@category">@category.DisplayName()</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Condition grade</span>
+                    <select @bind="_condition">
+                        @foreach (var condition in ConditionGrades.SellerOptions)
+                        {
+                            <option value="@condition">@condition</option>
+                        }
+                    </select>
+                </label>
+                <p class="grade-help wide">@ConditionGrades.Describe(_condition)</p>
+                <label class="wide">
+                    <span>Photo URL (optional)</span>
+                    <input placeholder="https://…" @bind="_img" @bind:event="oninput" />
+                </label>
+
+                @if (_isAuction)
+                {
+                    <label>
+                        <span>Starting bid ($)</span>
+                        <input inputmode="numeric" maxlength="7" placeholder="100" value="@_price" @oninput="OnPriceInput" />
+                    </label>
+                    <label>
+                        <span>Duration</span>
+                        <select @bind="_hours">
+                            @foreach (var (hours, label) in Durations)
+                            {
+                                <option value="@hours">@label</option>
+                            }
+                        </select>
+                    </label>
+                }
+                else
+                {
+                    <label>
+                        <span>Price ($)</span>
+                        <input inputmode="numeric" maxlength="7" placeholder="500" value="@_price" @oninput="OnPriceInput" />
+                    </label>
+                }
+            </div>
+
+            <h2 class="display section">2 · Transparency report</h2>
+            <p class="intro">Buyers trust honest second-hand listings. Tell them the story, flaws included. The more you disclose, the higher your transparency score.</p>
+
+            <div class="form">
+                <label>
+                    <span>Year made (optional)</span>
+                    <input inputmode="numeric" maxlength="4" placeholder="e.g. 2018" value="@_year" @oninput="OnYearInput" />
+                </label>
+                <label>
+                    <span>Owners so far</span>
+                    <select @bind="_owners">
+                        <option value="1">Just me (original owner)</option>
+                        <option value="2">2 owners</option>
+                        <option value="3">3 owners</option>
+                        <option value="4">4+ owners</option>
+                    </select>
+                </label>
+                <label>
+                    <span>How it's been used</span>
+                    <select @bind="_usage">
+                        @foreach (var usage in Enum.GetValues<UsageLevel>())
+                        {
+                            <option value="@usage">@usage.Label()</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    <span>Original retail price ($, optional)</span>
+                    <input inputmode="numeric" maxlength="7" placeholder="e.g. 900" value="@_original" @oninput="OnOriginalInput" />
+                </label>
+                <label class="wide">
+                    <span>Reason for selling</span>
+                    <input placeholder="e.g. Upgrading, moving, don't play it any more" maxlength="100" @bind="_reason" @bind:event="oninput" />
+                </label>
+            </div>
+
+            <p class="sub">Wear &amp; flaws</p>
+            <label class="check">
+                <input type="checkbox" @bind="_noWear" /> No visible wear
+            </label>
+            @if (!_noWear)
+            {
+                @if (_wear.Count > 0)
+                {
+                    <ul class="wear-list">
+                        @foreach (var note in _wear)
+                        {
+                            var current = note;
+                            <li>
+                                <span class="sev">@note.Severity.Label()</span>
+                                <span><b>@note.Area</b> — @note.Description</span>
+                                <button class="remove" aria-label="Remove" @onclick="() => _wear.Remove(current)">✕</button>
+                            </li>
+                        }
+                    </ul>
+                }
+                <div class="wear-add">
+                    <input placeholder="Where? e.g. Back of neck" maxlength="40" @bind="_wearArea" @bind:event="oninput" />
+                    <input placeholder="What? e.g. Light scratches" maxlength="80" @bind="_wearDesc" @bind:event="oninput" />
+                    <select @bind="_wearSeverity" aria-label="Severity">
+                        @foreach (var severity in Enum.GetValues<WearSeverity>())
+                        {
+                            <option value="@severity">@severity.Label()</option>
+                        }
+                    </select>
+                    <button class="add" @onclick="AddWear">Add flaw</button>
+                </div>
+            }
+
+            <p class="sub">What have you tested?</p>
+            <div class="checks">
+                @foreach (var label in ConditionReport.StandardChecks)
+                {
+                    var current = label;
+                    <label class="check">
+                        <input type="checkbox" checked="@_tested.Contains(current)" @onchange="e => ToggleTested(current, e.Value is true)" /> @label
+                    </label>
+                }
+            </div>
+
+            <p class="sub">Parts &amp; paperwork</p>
+            <div class="form">
+                <label class="wide">
+                    <span>What's included (separate with commas)</span>
+                    <input placeholder="e.g. Gig bag, strap, manual" maxlength="150" @bind="_included" @bind:event="oninput" />
+                </label>
+                <label class="wide">
+                    <span>Replaced or non-original parts (leave blank if all original)</span>
+                    <input placeholder="e.g. New tuners, aftermarket pickups" maxlength="150" @bind="_mods" @bind:event="oninput" />
+                </label>
+            </div>
+            <div class="checks">
+                <label class="check"><input type="checkbox" @bind="_serial" /> Serial number matches the maker's records</label>
+                <label class="check"><input type="checkbox" @bind="_receipt" /> I have proof of purchase</label>
+            </div>
+
+            <p class="@(_error is null ? "hint" : "hint error")">@(_error ?? "You can find your listings under Profile → Selling.")</p>
+
+            <button class="display publish" @onclick="Publish">@(_isAuction ? "Start Auction" : "Publish Listing")</button>
+        </div>
+
+        <aside class="preview-pane">
+            <p class="kicker">Live preview · how buyers will see it</p>
+            @if (_isAuction)
+            {
+                <div class="dark-wrap"><AuctionCard Auction="PreviewAuction" Preview="true" /></div>
+            }
+            else
+            {
+                <FixedCard Item="PreviewItem" Preview="true" />
+            }
+
+            <div class="score-card">
+                <TransparencyMeter Report="PreviewReport" />
+                @if (Tips.Count > 0)
+                {
+                    <p class="tips-title">Raise your score</p>
+                    <ul>
+                        @foreach (var tip in Tips)
+                        {
+                            <li>@tip</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="tips-title">Nice — buyers will love this listing.</p>
+                }
+            </div>
+        </aside>
+    </div>
+</div>
+
+@code {
+    private static readonly (int Hours, string Label)[] Durations =
+    {
+        (1, "1 hour"), (6, "6 hours"), (24, "24 hours"), (72, "3 days"),
+    };
+
+    // Basics
+    private bool _isAuction;
+    private string _name = "";
+    private string _brand = "";
+    private ItemCategory _category = ItemCategory.Guitars;
+    private string _condition = "Very Good";
+    private string _img = "";
+    private string _price = "";
+    private int _hours = 24;
+
+    // Transparency report
+    private string _year = "";
+    private int _owners = 1;
+    private UsageLevel _usage = UsageLevel.Regular;
+    private string _original = "";
+    private string _reason = "";
+    private bool _noWear;
+    private readonly List<WearNote> _wear = new();
+    private string _wearArea = "";
+    private string _wearDesc = "";
+    private WearSeverity _wearSeverity = WearSeverity.Minor;
+    private readonly HashSet<string> _tested = new();
+    private string _included = "";
+    private string _mods = "";
+    private bool _serial;
+    private bool _receipt;
+
+    private string? _error;
+
+    private string ModeClass(bool auction) => _isAuction == auction ? "mode mode-on" : "mode";
+
+    private static string Fallback(string value, string placeholder) =>
+        string.IsNullOrWhiteSpace(value) ? placeholder : value.Trim();
+
+    private static string Digits(object? value) =>
+        new string((value?.ToString() ?? "").Where(char.IsDigit).ToArray());
+
+    private void OnPriceInput(ChangeEventArgs e) { _price = Digits(e.Value); _error = null; }
+    private void OnYearInput(ChangeEventArgs e) => _year = Digits(e.Value);
+    private void OnOriginalInput(ChangeEventArgs e) => _original = Digits(e.Value);
+
+    private void ToggleTested(string label, bool on)
+    {
+        if (on) _tested.Add(label);
+        else _tested.Remove(label);
+    }
+
+    private void AddWear()
+    {
+        if (string.IsNullOrWhiteSpace(_wearArea) || string.IsNullOrWhiteSpace(_wearDesc))
+        {
+            _error = "Tell us where the flaw is and what it looks like.";
+            return;
+        }
+
+        _wear.Add(new WearNote(_wearArea.Trim(), _wearDesc.Trim(), _wearSeverity));
+        _wearArea = "";
+        _wearDesc = "";
+        _wearSeverity = WearSeverity.Minor;
+        _error = null;
+    }
+
+    private static List<string> Split(string text) =>
+        text.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+
+    private ConditionReport BuildReport()
+    {
+        int? year = null;
+        if (int.TryParse(_year, out var y) && y >= 1700 && y <= DateTime.UtcNow.Year) year = y;
+
+        int? original = null;
+        if (int.TryParse(_original, out var o) && o > 0) original = o;
+
+        return new ConditionReport
+        {
+            YearMade = year,
+            OwnerCount = _owners,
+            Usage = _usage,
+            ReasonForSelling = _reason.Trim(),
+            OriginalPrice = original,
+            NoVisibleWear = _noWear,
+            Wear = _noWear ? new List<WearNote>() : _wear.ToList(),
+            Checks = ConditionReport.StandardChecks
+                .Where(_tested.Contains)
+                .Select(label => new FunctionCheck(label, true))
+                .ToList(),
+            Included = Split(_included),
+            Modifications = Split(_mods),
+            SerialVerified = _serial,
+            HasReceipt = _receipt,
+        };
+    }
+
+    private ConditionReport PreviewReport => BuildReport();
+
+    private List<string> Tips
+    {
+        get
+        {
+            var r = BuildReport();
+            var tips = new List<string>();
+            if (!r.YearMade.HasValue) tips.Add("Add the year it was made (+15)");
+            if (!r.OriginalPrice.HasValue) tips.Add("Add the original retail price (+15)");
+            if (!r.NoVisibleWear && r.Wear.Count == 0) tips.Add("Describe any wear, or tick “No visible wear” (+20)");
+            if (r.Checks.Count < 3) tips.Add("Confirm what you've tested (+5 each, up to 3)");
+            if (string.IsNullOrWhiteSpace(r.ReasonForSelling)) tips.Add("Say why you're selling (+10)");
+            if (r.Included.Count == 0) tips.Add("List what's included (+10)");
+            if (!r.SerialVerified) tips.Add("Verify the serial number (+10)");
+            if (!r.HasReceipt) tips.Add("Mention proof of purchase (+5)");
+            return tips;
+        }
+    }
+
+    private string ImageUrl =>
+        Uri.TryCreate(_img?.Trim(), UriKind.Absolute, out var uri)
+        && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+            ? uri.ToString()
+            : SeedData.PlaceholderImage;
+
+    private int PriceValue => int.TryParse(_price, out var value) ? value : 0;
+
+    private FixedItem PreviewItem =>
+        new("preview", Fallback(_name, "Item name"), Fallback(_brand, "Brand"), _category, _condition, PriceValue, ImageUrl)
+        {
+            Report = BuildReport(),
+        };
+
+    private Auction PreviewAuction => new()
+    {
+        Id = "preview",
+        Name = Fallback(_name, "Item name"),
+        Brand = Fallback(_brand, "Brand"),
+        Condition = _condition,
+        Img = ImageUrl,
+        StartingBid = PriceValue,
+        EndsAtUtc = DateTime.UtcNow.AddHours(_hours),
+        IsYours = true,
+        Report = BuildReport(),
+    };
+
+    private void Publish()
+    {
+        if (string.IsNullOrWhiteSpace(_name) || string.IsNullOrWhiteSpace(_brand))
+        {
+            _error = "Please enter an item name and brand.";
+            return;
+        }
+
+        if (!int.TryParse(_price, out var amount) || amount <= 0)
+        {
+            _error = _isAuction ? "Enter a starting bid above $0." : "Enter a price above $0.";
+            return;
+        }
+
+        if (_year.Length > 0 && BuildReport().YearMade is null)
+        {
+            _error = $"Year made should be between 1700 and {DateTime.UtcNow.Year}.";
+            return;
+        }
+
+        var report = BuildReport();
+        var id = "u" + Guid.NewGuid().ToString("N")[..6];
+
+        if (_isAuction)
+        {
+            Auctions.Add(new Auction
+            {
+                Id = id,
+                Name = _name.Trim(),
+                Brand = _brand.Trim(),
+                Condition = _condition,
+                Img = ImageUrl,
+                StartingBid = amount,
+                EndsAtUtc = DateTime.UtcNow.AddHours(_hours),
+                IsYours = true,
+                Report = report,
+            });
+        }
+        else
+        {
+            Catalog.Add(new FixedItem(id, _name.Trim(), _brand.Trim(), _category, _condition, amount, ImageUrl)
+            {
+                IsYours = true,
+                Report = report,
+            });
+        }
+
+        Nav.NavigateTo("profile?tab=Selling");
+    }
+}

@@ -1,0 +1,138 @@
+@page "/profile"
+@inherits LiveComponentBase
+@inject CatalogService Catalog
+@inject OrderService Orders
+
+<PageTitle>@User.Name · Resound</PageTitle>
+
+<div class="profile">
+    <div class="head">
+        <div class="display avatar">@User.Initials</div>
+        <div>
+            <h1 class="display name">@User.Name</h1>
+            <p class="muted">@User.Subtitle</p>
+        </div>
+    </div>
+
+    <div class="tabs">
+        @foreach (var tab in Tabs)
+        {
+            var current = tab;
+            <button class="@(_tab == current ? "tab tab-on" : "tab")" @onclick="() => _tab = current">
+                @current
+                @if (current == "Active Bids")
+                {
+                    <span class="count">@Mine.Count</span>
+                }
+            </button>
+        }
+    </div>
+
+    @if (_tab == "Active Bids")
+    {
+        <div class="sections">
+            <section>
+                <h2 class="display heading">Winning <span class="muted">(@Winning.Count)</span></h2>
+                <div class="rows">
+                    @foreach (var auction in Winning)
+                    {
+                        <BidRow Auction="auction" />
+                    }
+                    @if (Winning.Count == 0)
+                    {
+                        <p class="muted">No leading bids yet.</p>
+                    }
+                </div>
+            </section>
+            <section>
+                <h2 class="display heading red">Needs a new bid <span>(@Outbid.Count)</span></h2>
+                <div class="rows">
+                    @foreach (var auction in Outbid)
+                    {
+                        <BidRow Auction="auction" />
+                    }
+                    @if (Outbid.Count == 0)
+                    {
+                        <p class="muted">You're not outbid on anything.</p>
+                    }
+                </div>
+            </section>
+        </div>
+    }
+    else if (_tab == "Orders")
+    {
+        <ul class="orders">
+            @foreach (var order in Orders.Orders)
+            {
+                <li>
+                    <span class="order-name">
+                        @if (order.Number.Length > 0)
+                        {
+                            <a href="order/@order.Number">@order.ItemName</a>
+                        }
+                        else
+                        {
+                            @order.ItemName
+                        }
+                        <span class="muted status">@order.StatusText</span>
+                    </span>
+                    <b>@Format.Money(order.Total)</b>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        if (YourFixed.Count + YourAuctions.Count == 0)
+        {
+            <div class="empty">
+                <p class="display empty-title">No active listings</p>
+                <a href="sell" class="btn btn-volt">List your gear</a>
+            </div>
+        }
+        else
+        {
+            <ul class="orders">
+                @foreach (var item in YourFixed)
+                {
+                    <li>
+                        <span class="order-name">@item.Brand @item.Name<span class="muted status">Buy It Now · @item.Condition</span></span>
+                        <b>@Format.Money(item.Price)</b>
+                    </li>
+                }
+                @foreach (var auction in YourAuctions)
+                {
+                    <li>
+                        <span class="order-name"><a href="auctions/@auction.Id">@auction.FullName</a><span class="muted status">Auction · ends in @Format.Countdown(auction.TimeLeft) · @auction.BidCount bids</span></span>
+                        <b>@Format.Money(auction.CurrentBid)</b>
+                    </li>
+                }
+            </ul>
+            <p class="more"><a href="sell" class="btn btn-volt btn-sm">List more gear</a></p>
+        }
+    }
+</div>
+
+@code {
+    private static readonly string[] Tabs = { "Active Bids", "Orders", "Selling" };
+
+    private string _tab = "Active Bids";
+
+    [SupplyParameterFromQuery(Name = "tab")]
+    public string? TabQuery { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (TabQuery is not null && Tabs.Contains(TabQuery, StringComparer.OrdinalIgnoreCase))
+            _tab = Tabs.First(t => string.Equals(t, TabQuery, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private List<FixedItem> YourFixed => Catalog.GetYourItems().ToList();
+    private List<Auction> YourAuctions => Service.GetYourAuctions().ToList();
+
+    private static UserProfile User => SeedData.User;
+
+    private List<Auction> Mine => Service.Auctions.Where(a => a.YourBid.HasValue).ToList();
+    private List<Auction> Winning => Mine.Where(a => a.Status == BidStatus.Highest).ToList();
+    private List<Auction> Outbid => Mine.Where(a => a.Status == BidStatus.Outbid).ToList();
+}
