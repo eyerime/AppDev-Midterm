@@ -1,0 +1,24 @@
+<div class="@RowClass">
+    <img src="@Auction.Img" alt="@Auction.Name" />
+    <div>
+        <BidBadge Status="Auction.Status" />
+        <h3>@Auction.FullName</h3>
+        <p class="meta tnum">Ends in @Format.Countdown(Auction.TimeLeft) · Your bid @Format.Money(Auction.YourBid ?? 0)</p>
+    </div>
+    <div class="side">
+        <div class="current-wrap">
+            <p class="label">Current</p>
+            <p class="@CurrentClass">@Format.Money(Auction.CurrentBid)</p>
+        </div>
+        <a href="auctions/@Auction.Id" class="@ButtonClass">@(IsWinning ? "View" : "Bid again")</a>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Auction Auction { get; set; } = default!;
+
+    private bool IsWinning => Auction.Status == BidStatus.Highest;
+    private string RowClass => IsWinning ? "bid-row win" : "bid-row lose";
+    private string CurrentClass => IsWinning ? "display tnum current" : "display tnum current red";
+    private string ButtonClass => IsWinning ? "btn btn-outline-ink btn-sm" : "btn btn-ink btn-sm";
+}

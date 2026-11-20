@@ -1,0 +1,39 @@
+@page "/auctions"
+@inherits LiveComponentBase
+
+<PageTitle>Live Bidding · Resound</PageTitle>
+
+<div class="page">
+    <div class="container inner">
+        <p class="kicker kicker-volt live-line">
+            <span class="pulse-dot dot"></span> @Service.Auctions.Count auctions live
+        </p>
+        <h1 class="display title">Live <span class="text-volt">Bidding</span></h1>
+
+        <div class="sorts">
+            @foreach (var (sort, label) in SortOptions)
+            {
+                var current = sort;
+                <button class="@(_sort == current ? "pill pill-on" : "pill")" @onclick="() => _sort = current">@label</button>
+            }
+        </div>
+
+        <div class="grid">
+            @foreach (var auction in Service.Sort(_sort))
+            {
+                <AuctionCard Auction="auction" />
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private AuctionSort _sort = AuctionSort.EndingSoonest;
+
+    private static readonly (AuctionSort Sort, string Label)[] SortOptions =
+    {
+        (AuctionSort.EndingSoonest, "Ending Soonest"),
+        (AuctionSort.LowestBid, "Lowest Bid"),
+        (AuctionSort.HighestBid, "Highest Bid"),
+    };
+}

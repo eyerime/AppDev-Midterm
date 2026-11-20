@@ -1,0 +1,37 @@
+@inject NavigationManager Nav
+
+<article class="@CardClass" @onclick="Open">
+    <div class="thumb">
+        <img src="@Item.Img" alt="@Item.Name" loading="lazy" />
+        <span class="tag">Buy It Now</span>
+        <button class="quick-add" aria-label="Quick add @Item.Name" @onclick="OnAdd" @onclick:stopPropagation="true">
+            <Icon Name="IconName.Plus" />
+        </button>
+    </div>
+    <div class="info">
+        <p class="muted">@Item.Brand · @Item.Category.DisplayName()</p>
+        <h3>@Item.Name</h3>
+        <p class="muted">@Item.Condition</p>
+        <p class="price">@Format.Money(Item.Price)</p>
+        @if (Item.Report is { } report)
+        {
+            <div class="tm"><TransparencyMeter Report="report" Compact="true" /></div>
+        }
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public FixedItem Item { get; set; } = default!;
+
+    [Parameter] public EventCallback OnAdd { get; set; }
+
+    /// <summary>Preview cards render normally but are not clickable.</summary>
+    [Parameter] public bool Preview { get; set; }
+
+    private string CardClass => Preview ? "fixed-card preview" : "fixed-card";
+
+    private void Open()
+    {
+        if (!Preview) Nav.NavigateTo($"items/{Item.Id}");
+    }
+}

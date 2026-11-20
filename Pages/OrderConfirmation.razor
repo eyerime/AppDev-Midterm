@@ -1,0 +1,71 @@
+@page "/order/{Number}"
+@inject OrderService Orders
+
+@if (_order is null)
+{
+    <PageTitle>Order not found · Resound</PageTitle>
+    <div class="container done">
+        <h1 class="display title">Order not found</h1>
+        <a href="profile?tab=Orders" class="btn btn-ink">View your orders</a>
+    </div>
+}
+else
+{
+    <PageTitle>Order @_order.Number · Resound</PageTitle>
+    <div class="container done">
+        <p class="kicker">Order @_order.Number</p>
+        <h1 class="display title">Order <span class="text-volt-bg">confirmed</span></h1>
+        <p class="lead">
+            @if (_order.Details is { } details)
+            {
+                <text>Thanks, @details.FullName. A confirmation is on its way to @details.Email.</text>
+            }
+            else
+            {
+                <text>@_order.StatusText</text>
+            }
+        </p>
+
+        <div class="card">
+            <ul>
+                @foreach (var item in _order.Items)
+                {
+                    <li>
+                        <img src="@item.Img" alt="" />
+                        <span>@item.Brand @item.Name<small class="muted">@item.Condition</small></span>
+                        <b>@Format.Money(item.Price)</b>
+                    </li>
+                }
+            </ul>
+            <div class="row"><span>Shipping</span><span>@Format.Money(_order.Shipping)</span></div>
+            <div class="row total"><span>Total</span><span>@Format.Money(_order.Total)</span></div>
+
+            @if (_order.Details is { } d)
+            {
+                <div class="meta">
+                    <div>
+                        <p class="label">Ship to</p>
+                        <p>@d.FullName<br />@d.Address<br />@d.City @d.PostalCode</p>
+                    </div>
+                    <div>
+                        <p class="label">Payment</p>
+                        <p>@d.PaymentMethod</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="actions">
+            <a href="/#market" class="btn btn-volt">Keep shopping</a>
+            <a href="profile?tab=Orders" class="btn btn-outline-ink">View my orders</a>
+        </div>
+    </div>
+}
+
+@code {
+    private Order? _order;
+
+    [Parameter] public string Number { get; set; } = "";
+
+    protected override void OnParametersSet() => _order = Orders.Get(Number);
+}

@@ -1,0 +1,12 @@
+@if (Status == BidStatus.Highest)
+{
+    <span class="badge badge-volt">Highest Bidder</span>
+}
+else if (Status == BidStatus.Outbid)
+{
+    <span class="badge badge-outbid">Outbid</span>
+}
+
+@code {
+    [Parameter, EditorRequired] public BidStatus Status { get; set; }
+}

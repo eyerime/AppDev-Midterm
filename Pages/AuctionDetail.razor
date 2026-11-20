@@ -1,0 +1,120 @@
+@page "/auctions/{Id}"
+@inherits LiveComponentBase
+
+@if (_auction is null)
+{
+    <PageTitle>Auction not found · Resound</PageTitle>
+    <div class="container missing">
+        <h1 class="display">Lot not found</h1>
+        <a class="btn btn-ink" href="auctions">← All auctions</a>
+    </div>
+}
+else
+{
+    <PageTitle>@_auction.FullName · Resound</PageTitle>
+
+    <div class="container detail">
+        <div class="visual">
+            <a href="auctions" class="back">← All auctions</a>
+            <div class="panel"></div>
+            <div class="slash"></div>
+            <img src="@_auction.Img" alt="@_auction.Name" />
+            <span class="display brand">@_auction.Brand</span>
+        </div>
+
+        <div class="info">
+            <div>
+                <div class="meta">
+                    <BidBadge Status="_auction.Status" />
+                    <span class="muted">@_auction.Condition · Lot #@_auction.LotNumber</span>
+                </div>
+                <h1 class="display name">@_auction.Name</h1>
+            </div>
+
+            <div class="timer">
+                <span class="label">@(_auction.HasEnded ? "Auction ended" : "Ends in")</span>
+                <span class="@TimerClass">@Format.Countdown(_auction.TimeLeft)</span>
+            </div>
+
+            <div>
+                <p class="label dark">Current Bid</p>
+                <p class="display tnum current">@Format.Money(_auction.CurrentBid)</p>
+                <p class="muted small">@_auction.BidCount bids placed · Starting bid @Format.Money(_auction.StartingBid)</p>
+            </div>
+
+            <div>
+                <div class="bid-input">
+                    <button class="quick" @onclick="() => Quick(10)">+$10</button>
+                    <label class="field">
+                        <span class="dollar">$</span>
+                        <input class="tnum" inputmode="numeric" maxlength="7" aria-label="Bid amount"
+                               placeholder="@_auction.MinimumNextBid" value="@_value" @oninput="OnInput" />
+                    </label>
+                    <button class="quick" @onclick="() => Quick(50)">+$50</button>
+                </div>
+                <p class="@MessageClass">@(_message ?? $"Enter {Format.Money(_auction.MinimumNextBid)} or more")</p>
+            </div>
+
+            <button class="display place" disabled="@_auction.HasEnded" @onclick="Submit">Place Bid</button>
+
+            <div class="history">
+                <button class="history-toggle" @onclick="() => _historyOpen = !_historyOpen">
+                    Bid History <span class="sign">@(_historyOpen ? "–" : "+")</span>
+                </button>
+                @if (_historyOpen)
+                {
+                    <ul>
+                        @foreach (var bid in _auction.History)
+                        {
+                            <li>
+                                <span><b class="@(bid.IsYou ? "you" : null)">@bid.Who</b> bid @Format.Money(bid.Amount)</span>
+                                <span class="muted">@bid.Ago</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <div class="report-wrap">
+            <ConditionReportView Report="_auction.Report" Condition="@_auction.Condition" Price="_auction.CurrentBid" PriceLabel="Current bid" />
+        </div>
+    </div>
+}
+
+@code {
+    private Auction? _auction;
+    private string _value = "";
+    private string? _message;
+    private bool _messageIsError;
+    private bool _historyOpen = true;
+
+    [Parameter] public string Id { get; set; } = "";
+
+    private string TimerClass => _auction!.IsUrgent ? "display tnum clock urgent" : "display tnum clock";
+    private string MessageClass => _messageIsError ? "hint error" : "hint";
+
+    protected override void OnParametersSet()
+    {
+        _auction = Service.Get(Id);
+        _value = "";
+        _message = null;
+    }
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        _value = new string((e.Value?.ToString() ?? "").Where(char.IsDigit).ToArray());
+        _message = null;
+    }
+
+    private void Quick(int increment) => _value = (_auction!.CurrentBid + increment).ToString();
+
+    private void Submit()
+    {
+        _ = int.TryParse(_value, out var amount);
+        var result = Service.PlaceBid(_auction!.Id, amount);
+        _messageIsError = !result.Success;
+        _message = result.Message;
+        if (result.Success) _value = "";
+    }
+}

@@ -1,0 +1,6 @@
+@url = https://YOUR-REF.supabase.co
+@key = sb_publishable_nhCZF-SWpRIzoOlKIMx_Sw_2wMbfAOK
+
+### Run schema.sql, start the app once (it seeds), then send this. Expect JSON rows.
+GET {{url}}/rest/v1/fixed_items?select=id,name,price&deleted_at=is.null
+apikey: {{key}}

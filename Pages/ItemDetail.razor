@@ -1,0 +1,113 @@
+@page "/items/{Id}"
+@inject CatalogService Catalog
+@inject CartService Cart
+@inject NavigationManager Nav
+
+@if (_item is null)
+{
+    <PageTitle>Item not found · Resound</PageTitle>
+    <div class="container missing">
+        <h1 class="display">Item not found</h1>
+        <p class="muted">It may have just been sold.</p>
+        <a class="btn btn-ink" href="/#market">← Back to the marketplace</a>
+    </div>
+}
+else
+{
+    <PageTitle>@_item.Brand @_item.Name · Resound</PageTitle>
+
+    <div class="container detail">
+        <a href="/#market" class="back">← Marketplace</a>
+
+        <div class="layout">
+            <div class="photo">
+                <img src="@_item.Img" alt="@_item.Name" />
+                <span class="tag">Buy It Now</span>
+            </div>
+
+            <div class="info">
+                <p class="kicker">@_item.Brand · @_item.Category.DisplayName()</p>
+                <h1 class="display name">@_item.Name</h1>
+                <p class="muted sub">@_item.Condition condition · Item #@_item.Id.ToUpperInvariant()</p>
+                <p class="display price">@Format.Money(_item.Price)</p>
+
+                @if (_item.Report is { } report)
+                {
+                    <a href="@(Nav.Uri.Split('#')[0])#report" class="report-link">
+                        <TransparencyMeter Report="report" Compact="true" />
+                        <span>Read the full condition report ↓</span>
+                    </a>
+                }
+
+                <p class="desc">
+                    A @_item.Condition.ToLowerInvariant() @_item.Name from @_item.Brand, checked by our team and ready to play.
+                    Every Resound listing is one-of-a-kind, so once it's gone it's gone.
+                </p>
+
+                <dl class="specs">
+                    <div><dt>Brand</dt><dd>@_item.Brand</dd></div>
+                    <div><dt>Category</dt><dd>@_item.Category.DisplayName()</dd></div>
+                    <div><dt>Condition</dt><dd>@_item.Condition</dd></div>
+                    <div><dt>Shipping</dt><dd>@Format.Money(CartService.ShippingFee) flat rate</dd></div>
+                </dl>
+
+                @if (_item.IsYours)
+                {
+                    <p class="note">This is your listing. You'll find it under Profile → Selling.</p>
+                }
+                else
+                {
+                    <div class="buttons">
+                        <button class="btn btn-volt" @onclick="BuyNow">Buy Now</button>
+                        @if (Cart.Contains(_item.Id))
+                        {
+                            <a class="btn btn-outline-ink" href="cart">✓ In cart · View cart</a>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-ink" @onclick="AddToCart">Add to cart</button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <ConditionReportView Report="_item.Report" Condition="@_item.Condition" Price="_item.Price" />
+
+        @if (_related.Count > 0)
+        {
+            <section class="related">
+                <h2 class="display">More like this</h2>
+                <div class="grid">
+                    @foreach (var other in _related)
+                    {
+                        <FixedCard Item="other" OnAdd="() => Cart.Add(other)" />
+                    }
+                </div>
+            </section>
+        }
+    </div>
+}
+
+@code {
+    private FixedItem? _item;
+    private List<FixedItem> _related = new();
+
+    [Parameter] public string Id { get; set; } = "";
+
+    protected override void OnParametersSet()
+    {
+        _item = Catalog.Find(Id);
+        _related = _item is null
+            ? new()
+            : Catalog.GetItems(group: _item.Category.Group()).Where(i => i.Id != _item.Id).Take(4).ToList();
+    }
+
+    private void AddToCart() => Cart.Add(_item!);
+
+    private void BuyNow()
+    {
+        Cart.Add(_item!);
+        Nav.NavigateTo("checkout");
+    }
+}

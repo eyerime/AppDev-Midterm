@@ -1,0 +1,313 @@
+.nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid rgba(10, 10, 10, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+}
+
+.nav-inner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 2rem;
+    height: 72px;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.nav ::deep .logo {
+    font-size: 34px;
+    line-height: 1;
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.nav ::deep .logo-mark {
+    background: var(--volt);
+    padding: 0 0.25rem;
+}
+
+.nav ::deep .links {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.nav ::deep .link {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.2s, background 0.2s;
+}
+
+.nav ::deep .link:hover {
+    color: var(--mute);
+}
+
+.nav ::deep .link.live {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: var(--ink);
+    padding: 0.5rem 1rem;
+    color: var(--volt);
+}
+
+.nav ::deep .link.live:hover {
+    background: rgba(10, 10, 10, 0.85);
+    color: var(--volt);
+}
+
+.nav ::deep .link.live.active {
+    background: var(--volt);
+    color: var(--ink);
+}
+
+.nav ::deep .live-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--outbid);
+}
+
+.nav ::deep .actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.nav ::deep .search {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: var(--fog);
+    padding: 0.625rem 1rem;
+}
+
+.nav ::deep .search input {
+    width: 9rem;
+    border: 0;
+    background: transparent;
+    font-size: 0.875rem;
+    outline: none;
+}
+
+.nav ::deep .cart {
+    position: relative;
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+}
+
+.nav ::deep .cart-count {
+    position: absolute;
+    right: -0.5rem;
+    top: -0.5rem;
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: var(--volt);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.nav ::deep .profile {
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    padding: 0.375rem;
+    color: var(--ink);
+}
+
+.nav ::deep .profile.active {
+    background: var(--volt);
+}
+
+@media (min-width: 1024px) {
+    .nav-inner {
+        padding: 0 2.5rem;
+    }
+
+    .nav ::deep .links {
+        display: flex;
+    }
+}
+
+@media (min-width: 1280px) {
+    .nav ::deep .search {
+        display: flex;
+    }
+}
+
+
+/* ---- Shop mega-menu ------------------------------------------------------ */
+
+.nav ::deep .shop {
+    position: relative;
+}
+
+.nav ::deep .shop-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.nav ::deep .menu-wrap {
+    position: absolute;
+    top: 100%;
+    left: -1rem;
+    z-index: 60;
+    padding-top: 1.25rem;
+}
+
+.nav ::deep .menu {
+    width: 780px;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    padding: 1.75rem 2rem 1.25rem;
+    box-shadow: 10px 10px 0 0 var(--volt);
+}
+
+.nav ::deep .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.nav ::deep .menu-title {
+    margin: 0 0 0.75rem;
+    border-bottom: 3px solid var(--volt);
+    padding-bottom: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.nav ::deep .menu-link {
+    display: block;
+    padding: 0.3rem 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.nav ::deep .menu-link:hover {
+    background: var(--volt);
+}
+
+.nav ::deep .menu-all {
+    display: inline-block;
+    margin-top: 1.25rem;
+    border-top: 1px solid rgba(10, 10, 10, 0.15);
+    padding-top: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.nav ::deep .menu-all:hover {
+    text-decoration: underline;
+}
+
+/* ---- Mobile menu --------------------------------------------------------- */
+
+.nav ::deep .burger {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.nav ::deep .mobile {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    max-height: calc(100vh - 72px);
+    overflow-y: auto;
+    border-top: 1px solid rgba(10, 10, 10, 0.1);
+    background: var(--paper);
+    padding: 1rem 1.5rem 2rem;
+}
+
+.nav ::deep .m-search {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: var(--fog);
+    padding: 0.625rem 1rem;
+}
+
+.nav ::deep .m-search input {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    outline: none;
+}
+
+.nav ::deep .m-main {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0;
+}
+
+.nav ::deep .m-link {
+    border-bottom: 1px solid rgba(10, 10, 10, 0.1);
+    padding: 0.875rem 0;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.nav ::deep .m-link.active {
+    background: var(--volt);
+    padding-left: 0.5rem;
+}
+
+.nav ::deep .m-title {
+    margin: 1.25rem 0 0.5rem;
+    border-bottom: 3px solid var(--volt);
+    padding-bottom: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.nav ::deep .m-cats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem 1rem;
+}
+
+.nav ::deep .m-cat {
+    padding: 0.4rem 0;
+    font-size: 0.9rem;
+}
+
+@media (min-width: 1024px) {
+    .nav ::deep .burger,
+    .nav ::deep .mobile {
+        display: none;
+    }
+}

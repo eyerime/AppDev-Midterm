@@ -1,0 +1,73 @@
+.page {
+    min-height: 100vh;
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.inner {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+.live-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    background: var(--volt);
+}
+
+.title {
+    margin: 0;
+    font-size: clamp(88px, 15vw, 220px);
+}
+
+.sorts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 2.5rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 1.5rem;
+}
+
+.pill {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    padding: 0.625rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--paper);
+}
+
+.pill:hover {
+    border-color: var(--volt);
+    color: var(--volt);
+}
+
+.pill.pill-on {
+    border-color: var(--volt);
+    background: var(--volt);
+    color: var(--ink);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1280px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+}

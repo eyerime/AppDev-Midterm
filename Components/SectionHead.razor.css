@@ -1,0 +1,11 @@
+.section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.section-title {
+    font-size: clamp(56px, 8vw, 112px);
+}

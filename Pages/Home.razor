@@ -1,0 +1,116 @@
+@page "/"
+@inherits LiveComponentBase
+@inject CatalogService Catalog
+@inject CartService Cart
+
+<PageTitle>Resound · Second-hand instruments</PageTitle>
+
+<section class="hero">
+    <img class="hero-img" src="@SeedData.HeroImage" alt="Black single-cutaway electric guitar" />
+    <div class="hero-fade"></div>
+    <div class="hero-slash"></div>
+    <div class="container hero-content">
+        <p class="kicker kicker-volt">Pre-loved. Road-tested. Ready.</p>
+        <h1 class="display hero-title">Find Your<br /><span class="text-volt">Sound</span></h1>
+        <div class="hero-actions">
+            <a href="#market" class="btn btn-volt">Shop Gear <Icon Name="IconName.Arrow" /></a>
+            <a href="auctions" class="btn btn-ghost">Live Auctions</a>
+        </div>
+    </div>
+</section>
+
+<section id="market" class="container market">
+    <SectionHead Kicker="Section A · Buy It Now" Title="The Marketplace">
+        <div class="filters">
+            <button class="@Chip(_category is null && _group is null && _query is null)" @onclick="ClearFilters">All</button>
+            @if (!string.IsNullOrWhiteSpace(_query))
+            {
+                <button class="chip chip-on" title="Clear search" @onclick="ClearFilters">“@_query” ✕</button>
+            }
+            @if (_category is { } selectedCategory)
+            {
+                <button class="chip chip-on" title="Clear filter" @onclick="ClearFilters">@selectedCategory.DisplayName() ✕</button>
+            }
+            @foreach (var group in Enum.GetValues<CategoryGroup>())
+            {
+                var current = group;
+                <button class="@Chip(_category is null && _query is null && _group == current)" @onclick="() => SelectGroup(current)">@group.DisplayName()</button>
+            }
+        </div>
+    </SectionHead>
+
+    @{
+        var items = Catalog.GetItems(_category, _group, _query).ToList();
+    }
+
+    @if (items.Count == 0)
+    {
+        <div class="empty">
+            <p class="display empty-title">Nothing here yet</p>
+            <p class="muted">No one has listed gear in this category. Be the first.</p>
+            <a href="sell" class="btn btn-volt">List your gear</a>
+        </div>
+    }
+    else
+    {
+        <div class="grid">
+            @foreach (var item in items)
+            {
+                <FixedCard Item="item" OnAdd="() => Cart.Add(item)" />
+            }
+        </div>
+    }
+</section>
+
+<section class="block">
+    <div class="container">
+        <SectionHead Dark="true" Kicker="Section B · Bid to win" Title="The Auction Block">
+            <a href="auctions" class="btn btn-volt see-all">See all <Icon Name="IconName.Arrow" /></a>
+        </SectionHead>
+
+        <div class="carousel">
+            @foreach (var auction in Service.Sort(AuctionSort.EndingSoonest).Take(5))
+            {
+                <div class="slide"><AuctionCard Auction="auction" /></div>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    private ItemCategory? _category;
+    private CategoryGroup? _group;
+    private string? _query;
+
+    [SupplyParameterFromQuery(Name = "category")]
+    public string? CategoryQuery { get; set; }
+
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? SearchQuery { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _group = null;
+        _query = string.IsNullOrWhiteSpace(SearchQuery) ? null : SearchQuery.Trim();
+        _category = Enum.TryParse<ItemCategory>(CategoryQuery, ignoreCase: true, out var parsed)
+                    && Enum.IsDefined(parsed)
+            ? parsed
+            : null;
+    }
+
+    private void ClearFilters()
+    {
+        _category = null;
+        _group = null;
+        _query = null;
+    }
+
+    private void SelectGroup(CategoryGroup group)
+    {
+        _category = null;
+        _query = null;
+        _group = group;
+    }
+
+    private static string Chip(bool on) => on ? "chip chip-on" : "chip";
+}

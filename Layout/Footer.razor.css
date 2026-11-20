@@ -1,0 +1,17 @@
+.footer {
+    background: var(--ink);
+    padding: 3rem 2.5rem;
+    color: var(--paper);
+}
+
+.wordmark {
+    margin: 0;
+    font-size: clamp(60px, 10vw, 160px);
+    color: var(--volt);
+}
+
+.tagline {
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+}

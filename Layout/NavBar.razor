@@ -1,0 +1,133 @@
+@implements IDisposable
+@inject CartService Cart
+@inject NavigationManager Nav
+
+<header class="nav">
+    <div class="nav-inner">
+        <NavLink href="" Match="NavLinkMatch.All" class="logo display" aria-label="Resound home">
+            Re<span class="logo-mark">sound</span>
+        </NavLink>
+
+        <nav class="links">
+            <div class="shop" @onmouseenter="OpenMenu" @onmouseleave="CloseMenu">
+                <button class="link shop-toggle" aria-haspopup="true" aria-expanded="@(_menuOpen ? "true" : "false")" @onclick="ToggleMenu">
+                    Shop <span class="caret">▾</span>
+                </button>
+                @if (_menuOpen)
+                {
+                    <div class="menu-wrap">
+                        <div class="menu">
+                            <div class="menu-grid">
+                                @foreach (var group in Enum.GetValues<CategoryGroup>())
+                                {
+                                    <div class="menu-col">
+                                        <p class="menu-title">@group.DisplayName()</p>
+                                        @foreach (var category in ItemCategoryExtensions.InGroup(group))
+                                        {
+                                            <a class="menu-link" href="/?category=@category#market" @onclick="CloseMenu">@category.DisplayName()</a>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <a class="menu-all" href="/#market" @onclick="CloseMenu">Browse all gear →</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <NavLink href="auctions" class="link live" ActiveClass="active">
+                <span class="pulse-dot live-dot"></span> Live Auctions
+            </NavLink>
+            <NavLink href="sell" class="link" ActiveClass="active">Sell Gear</NavLink>
+        </nav>
+
+        <div class="actions">
+            <label class="search">
+                <Icon Name="IconName.Search" />
+                <input placeholder="Search gear" aria-label="Search gear"
+                       @bind="_search" @bind:event="oninput" @onkeydown="OnSearchKey" />
+            </label>
+            <NavLink href="cart" class="cart" aria-label="Cart">
+                <Icon Name="IconName.Cart" Size="22" />
+                @if (Cart.Count > 0)
+                {
+                    <span class="cart-count">@Cart.Count</span>
+                }
+            </NavLink>
+            <NavLink href="profile" class="profile" ActiveClass="active" aria-label="Profile">
+                <Icon Name="IconName.User" Size="22" />
+            </NavLink>
+            <button class="burger" aria-label="Menu" aria-expanded="@(_mobileOpen ? "true" : "false")" @onclick="ToggleMobile">
+                @(_mobileOpen ? "✕" : "☰")
+            </button>
+        </div>
+    </div>
+
+    @if (_mobileOpen)
+    {
+        <div class="mobile">
+            <label class="m-search">
+                <Icon Name="IconName.Search" />
+                <input placeholder="Search gear" aria-label="Search gear"
+                       @bind="_search" @bind:event="oninput" @onkeydown="OnSearchKey" />
+            </label>
+
+            <div class="m-main">
+                <NavLink href="auctions" class="m-link" ActiveClass="active">Live Auctions</NavLink>
+                <NavLink href="sell" class="m-link" ActiveClass="active">Sell Gear</NavLink>
+                <NavLink href="profile" class="m-link" ActiveClass="active">Profile</NavLink>
+            </div>
+
+            @foreach (var group in Enum.GetValues<CategoryGroup>())
+            {
+                <p class="m-title">@group.DisplayName()</p>
+                <div class="m-cats">
+                    @foreach (var category in ItemCategoryExtensions.InGroup(group))
+                    {
+                        <a class="m-cat" href="/?category=@category#market" @onclick="CloseMobile">@category.DisplayName()</a>
+                    }
+                </div>
+            }
+        </div>
+    }
+</header>
+
+@code {
+    private bool _menuOpen;
+    private bool _mobileOpen;
+    private string _search = "";
+
+    protected override void OnInitialized()
+    {
+        Cart.Changed += HandleChanged;
+        Nav.LocationChanged += HandleLocationChanged;
+    }
+
+    private void OpenMenu() => _menuOpen = true;
+    private void CloseMenu() => _menuOpen = false;
+    private void ToggleMenu() => _menuOpen = !_menuOpen;
+    private void ToggleMobile() => _mobileOpen = !_mobileOpen;
+    private void CloseMobile() => _mobileOpen = false;
+
+    private void OnSearchKey(KeyboardEventArgs e)
+    {
+        if (e.Key != "Enter" || string.IsNullOrWhiteSpace(_search)) return;
+
+        _mobileOpen = false;
+        Nav.NavigateTo($"/?q={Uri.EscapeDataString(_search.Trim())}#market");
+    }
+
+    private void HandleChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private void HandleLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        _menuOpen = false;
+        _mobileOpen = false;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Cart.Changed -= HandleChanged;
+        Nav.LocationChanged -= HandleLocationChanged;
+    }
+}

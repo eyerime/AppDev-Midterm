@@ -1,0 +1,137 @@
+.profile {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 50%;
+    background: var(--volt);
+    font-size: 36px;
+}
+
+.name {
+    margin: 0;
+    font-size: clamp(56px, 7vw, 96px);
+}
+
+.head p {
+    margin: 0.75rem 0 0;
+}
+
+.tabs {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    border-bottom: 2px solid var(--ink);
+    overflow-x: auto;
+}
+
+.tab {
+    margin-bottom: -2px;
+    border-bottom: 4px solid transparent;
+    padding-bottom: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--mute);
+    white-space: nowrap;
+}
+
+.tab:hover {
+    color: var(--ink);
+}
+
+.tab.tab-on {
+    border-bottom-color: var(--volt);
+    color: var(--ink);
+}
+
+.count {
+    margin-left: 0.5rem;
+    border-radius: 999px;
+    background: var(--ink);
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--volt);
+}
+
+.sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.heading {
+    margin: 0 0 1rem;
+    font-size: 36px;
+}
+
+.heading.red {
+    color: var(--outbid);
+}
+
+.rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.orders {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.orders li {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid rgba(10, 10, 10, 0.1);
+    padding: 1.25rem 0;
+}
+
+.orders li:first-child {
+    border-top: 0;
+}
+
+.order-name {
+    font-weight: 600;
+}
+
+.status {
+    margin-left: 1rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+.empty {
+    background: var(--fog);
+    padding: 2.5rem;
+    text-align: center;
+}
+
+.empty-title {
+    margin: 0 0 1rem;
+    font-size: 48px;
+}
+
+.more {
+    margin: 1.5rem 0 0;
+}
+
+.order-name a:hover {
+    text-decoration: underline;
+}

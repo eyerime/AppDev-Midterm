@@ -1,0 +1,19 @@
+<div class="@MeterClass" title="@Report.ScoreLabel">
+    <div class="top">
+        <span class="label">Transparency</span>
+        <span class="num tnum">@Report.Score<small>/100</small></span>
+    </div>
+    <div class="bar"><div class="fill" style="width: @(Report.Score)%"></div></div>
+    @if (!Compact)
+    {
+        <p class="caption">@Report.ScoreLabel</p>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ConditionReport Report { get; set; } = default!;
+
+    [Parameter] public bool Compact { get; set; }
+
+    private string MeterClass => Compact ? "meter compact" : "meter";
+}
